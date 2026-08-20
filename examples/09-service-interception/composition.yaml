@@ -1,0 +1,18 @@
+- id: http
+  name: http-client
+- id: bulk-export
+  name: fetch
+  inject: [http]
+  config:
+    workload: bulk-export
+  intercept:
+    http:
+      timeout_ms: 250
+- id: payment-webhook
+  name: fetch
+  inject: [http]
+  config:
+    workload: payment-webhook
+  intercept:
+    http:
+      retries: 0

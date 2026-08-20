@@ -1,0 +1,17 @@
+- id: journal
+  name: note-journal
+- id: store
+  name: note-store
+  config:
+    driver: memory
+- id: writer
+  name: note-writer
+  inject: [notes, journal]
+  config:
+    key: hello
+    text: the first note
+- id: report
+  name: note-reporter
+  inject: [notes, journal]
+  config:
+    label: main

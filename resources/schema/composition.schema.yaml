@@ -1,0 +1,122 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+title: Cordis PHP composition
+description: >-
+  Static envelope for a Cordis PHP YAML composition. Plugin-specific config is
+  intentionally opaque here and is validated by the registered plugin.
+type: array
+items:
+  $ref: '#/$defs/entry'
+$defs:
+  identifier:
+    type: string
+    minLength: 1
+  string-list:
+    type: array
+    items:
+      type: string
+      minLength: 1
+    uniqueItems: true
+  expression:
+    anyOf:
+      - type: string
+      - type: object
+        required:
+          - '$expr'
+        properties:
+          '$expr':
+            $ref: '#/$defs/expression-spec'
+        additionalProperties: false
+  expression-spec:
+    oneOf:
+      - type: string
+      - type: object
+        required:
+          - env
+        properties:
+          env:
+            $ref: '#/$defs/identifier'
+          default: {}
+        additionalProperties: false
+      - type: object
+        required:
+          - service
+        properties:
+          service:
+            $ref: '#/$defs/identifier'
+        additionalProperties: false
+      - type: object
+        required:
+          - coalesce
+        properties:
+          coalesce:
+            type: array
+            minItems: 1
+            items: {}
+        additionalProperties: false
+      - type: object
+        required:
+          - concat
+        properties:
+          concat:
+            type: array
+            items: {}
+        additionalProperties: false
+  disabled:
+    anyOf:
+      - type: boolean
+      - $ref: '#/$defs/expression'
+  intercept:
+    type: object
+    patternProperties:
+      '^.+$':
+        type: object
+    additionalProperties: false
+  plugin-entry:
+    type: object
+    required:
+      - id
+      - name
+    properties:
+      id:
+        $ref: '#/$defs/identifier'
+      name:
+        $ref: '#/$defs/identifier'
+      config: {}
+      disabled:
+        $ref: '#/$defs/disabled'
+      inject:
+        anyOf:
+          - type: 'null'
+          - $ref: '#/$defs/string-list'
+      isolate:
+        $ref: '#/$defs/string-list'
+      intercept:
+        $ref: '#/$defs/intercept'
+    additionalProperties: false
+  group-entry:
+    type: object
+    required:
+      - id
+      - group
+    properties:
+      id:
+        $ref: '#/$defs/identifier'
+      disabled:
+        $ref: '#/$defs/disabled'
+      inject:
+        anyOf:
+          - type: 'null'
+          - $ref: '#/$defs/string-list'
+      isolate:
+        $ref: '#/$defs/string-list'
+      intercept:
+        $ref: '#/$defs/intercept'
+      group:
+        type: array
+        items:
+          $ref: '#/$defs/entry'
+    additionalProperties: false
+  entry:
+    oneOf:
+      - $ref: '#/$defs/plugin-entry'
+      - $ref: '#/$defs/group-entry'

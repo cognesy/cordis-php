@@ -1,0 +1,67 @@
+# Store repository text consistently on every platform.
+* text=auto eol=lf
+
+# Source, configuration, and documentation are always LF-normalized text.
+*.php text eol=lf diff=php
+*.php8 text eol=lf diff=php
+*.inc text eol=lf diff=php
+*.json text eol=lf
+*.neon text eol=lf
+*.xml text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.md text eol=lf
+*.rst text eol=lf
+*.txt text eol=lf
+*.sh text eol=lf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Composer's lock file is useful to contributors but is generated metadata and
+# does not belong in a package source archive.
+composer.lock text eol=lf linguist-generated=true export-ignore
+
+# Binary assets must never receive end-of-line conversion or textual diffs.
+*.7z binary
+*.avi binary
+*.avif binary
+*.bin binary
+*.bmp binary
+*.class binary
+*.dll binary
+*.eot binary
+*.exe binary
+*.gif binary
+*.gz binary
+*.ico binary
+*.jar binary
+*.jpeg binary
+*.jpg binary
+*.mp3 binary
+*.mp4 binary
+*.mov binary
+*.otf binary
+*.pdf binary
+*.phar binary
+*.png binary
+*.rar binary
+*.tar binary
+*.tgz binary
+*.ttf binary
+*.wasm binary
+*.webm binary
+*.webp binary
+*.woff binary
+*.woff2 binary
+*.xz binary
+*.zip binary
+
+# Development-only material stays in the repository but not release archives.
+.github/** export-ignore
+tests/** export-ignore
+phpunit.xml export-ignore
+phpstan.neon export-ignore
+pint.json export-ignore
+.gitattributes export-ignore
+.gitignore export-ignore

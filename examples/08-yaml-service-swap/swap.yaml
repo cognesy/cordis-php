@@ -1,0 +1,6 @@
+# `name` is a precondition: this layer refuses to target a different store.
+- id: store
+  name: note-store
+  config:
+    driver: file
+    path: !expr env:NOTE_STORE_PATH

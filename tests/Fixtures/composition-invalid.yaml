@@ -1,0 +1,3 @@
+- id: invalid
+  name: recorder
+  unexpected: true

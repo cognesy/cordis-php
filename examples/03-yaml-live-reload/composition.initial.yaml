@@ -1,0 +1,17 @@
+- id: platform
+  group:
+    - id: logger
+      name: logger
+      config:
+        channel: !expr env:APP_CHANNEL
+    - id: client
+      name: http-client
+      inject:
+        - logger
+      config:
+        base_uri:
+          $expr:
+            concat:
+              - https://
+              - !expr service:api-host
+              - /v1

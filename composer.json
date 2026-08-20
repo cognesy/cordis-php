@@ -1,0 +1,58 @@
+{
+  "name": "cordis-php/cordis",
+  "description": "A strictly typed, YAML-composed plugin runtime for PHP 8.4+.",
+  "type": "library",
+  "license": "MIT",
+  "keywords": [
+    "plugins",
+    "composition",
+    "yaml",
+    "runtime",
+    "cordis"
+  ],
+  "require": {
+    "php": "^8.4",
+    "symfony/yaml": "^7.3"
+  },
+  "require-dev": {
+    "laravel/pint": "^1.21",
+    "pestphp/pest": "^3.8",
+    "phpstan/phpstan": "^2.1"
+  },
+  "autoload": {
+    "psr-4": {
+      "CordisPhp\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "CordisPhp\\Tests\\": "tests/"
+    }
+  },
+  "scripts": {
+    "analyse": "@php vendor/bin/phpstan analyse --memory-limit=512M",
+    "format": "@php vendor/bin/pint",
+    "lint": "@php vendor/bin/pint --test",
+    "test": "@php vendor/bin/pest",
+    "examples": "@php examples/run-all.php",
+    "composer-validate": "@composer validate --strict",
+    "qa": [
+      "@composer-validate",
+      "@analyse",
+      "@lint",
+      "@test",
+      "@examples"
+    ]
+  },
+  "config": {
+    "platform": {
+      "php": "8.4.0"
+    },
+    "sort-packages": true,
+    "allow-plugins": {
+      "pestphp/pest-plugin": true
+    }
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true
+}
