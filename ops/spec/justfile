@@ -1,0 +1,4 @@
+schema:
+    @php ops/spec/bin/validate.php
+
+all: schema

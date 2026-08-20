@@ -1,0 +1,34 @@
+---
+$schema: "../schema/capability.v1.schema.yaml"
+schema_version: "ops-capability/v1"
+id: "docs"
+provides: "documentation"
+description: >-
+  Keeps documentation readable and each executable example discoverable.
+status: "supported"
+requires:
+  tools:
+    - "markdownlint"
+    - "php"
+  capabilities: []
+owns:
+  - "ops/docs/**"
+reads:
+  - "README.md"
+  - "docs/**"
+  - "examples/**"
+  - "skills/**"
+generates: []
+commands:
+  - name: "lint"
+    summary: "Lint repository Markdown without modifying documentation."
+    lane: "fast"
+    aggregate: "check"
+  - name: "contracts"
+    summary: "Verify example directories and the example index stay aligned."
+    lane: "fast"
+    aggregate: "check"
+  - name: "all"
+    summary: "Run documentation style and example discoverability checks."
+    lane: "fast"
+skills: []

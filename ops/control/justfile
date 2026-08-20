@@ -1,0 +1,17 @@
+default:
+    @php ops/bin/ops.php list
+
+list *args:
+    @php ops/bin/ops.php list {{ args }}
+
+validate *args:
+    @php ops/bin/ops.php validate {{ args }}
+
+doctor *args:
+    @php ops/bin/ops.php doctor {{ args }}
+
+aggregate lane *args:
+    @php ops/bin/ops.php aggregate {{ lane }} {{ args }}
+
+test:
+    @php ops/control/tests/catalogue.php

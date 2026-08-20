@@ -1,0 +1,6 @@
+---
+interface:
+  display_name: "Cordis PHP Solution Design"
+  short_description: "Design lifecycle-safe Cordis PHP systems"
+  default_prompt: >-
+    Use $cordis-php-solution-design to design this Cordis PHP solution.

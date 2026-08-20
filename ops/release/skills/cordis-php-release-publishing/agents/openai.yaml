@@ -1,0 +1,10 @@
+---
+$schema: "../../../../schema/skill.openai.v1.schema.yaml"
+schema_version: "ops-skill-openai/v1"
+interface:
+  display_name: "Cordis PHP Release Publishing"
+  short_description: "Perform a guarded, explicit Cordis PHP GitHub release."
+  default_prompt: >-
+    Use $cordis-php-release-publishing for an authorized release.
+policy:
+  allow_implicit_invocation: false

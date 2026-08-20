@@ -1,0 +1,6 @@
+---
+interface:
+  display_name: "Cordis PHP Runtime Operations"
+  short_description: "Operate and observe Cordis runtimes"
+  default_prompt: >-
+    Use $cordis-php-runtime-operations for this Cordis runtime.

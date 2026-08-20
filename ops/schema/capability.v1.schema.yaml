@@ -1,0 +1,136 @@
+---
+$schema: "https://json-schema.org/draft/2020-12/schema"
+$id: "ops/capability.v1.schema.yaml"
+title: "Cordis PHP Repository Operation Capability (v1)"
+description: >-
+  One independently addressable repository operation. A manifest describes its
+  purpose, dependencies, owned/read/generated paths, shell commands, and agent
+  skills without requiring a reader to inspect implementation files first.
+type: object
+additionalProperties: false
+required:
+  - $schema
+  - schema_version
+  - id
+  - provides
+  - description
+  - status
+  - requires
+  - owns
+  - reads
+  - generates
+  - commands
+  - skills
+properties:
+  $schema:
+    type: string
+    minLength: 1
+  schema_version:
+    description: >-
+      Version of this manifest format. A format change adds a new schema rather
+      than silently reinterpreting an existing capability.
+    const: "ops-capability/v1"
+  id:
+    description: "Capability id and directory name under ops/."
+    type: string
+    pattern: "^[a-z][a-z0-9-]*$"
+  provides:
+    description: "Operational interface implemented by this capability."
+    type: string
+    pattern: "^[a-z][a-z0-9-]*$"
+  description:
+    description: "One-sentence outcome owned by the capability."
+    type: string
+    minLength: 1
+  status:
+    description: >-
+      Supported is a maintained promise; experimental is deliberately
+      provisional.
+    enum: [supported, experimental, deprecated]
+  requires:
+    description: >-
+      Tools on PATH and peer capabilities required before commands can run.
+    type: object
+    additionalProperties: false
+    required: [tools, capabilities]
+    properties:
+      tools:
+        type: array
+        uniqueItems: true
+        items:
+          type: string
+          pattern: "^[A-Za-z0-9._-]+$"
+      capabilities:
+        type: array
+        uniqueItems: true
+        items:
+          type: string
+          pattern: "^[a-z][a-z0-9-]*$"
+  owns:
+    description: >-
+      Sole-author paths. Every file under ops/ must have exactly one owner.
+    $ref: "#/$defs/paths"
+  reads:
+    description: "External inputs this capability depends on but does not own."
+    $ref: "#/$defs/paths"
+  generates:
+    description: >-
+      Derived outputs. They are distinct from authored paths and may be rebuilt.
+    $ref: "#/$defs/paths"
+  commands:
+    description: >-
+      Commands implemented by the capability justfile. An aggregate marker lets
+      repository-wide check and test lanes be derived from manifests.
+    type: array
+    minItems: 1
+    uniqueItems: true
+    items:
+      $ref: "#/$defs/command"
+  skills:
+    description: >-
+      Agent procedures. A command says what to run; a skill says how to decide.
+    type: array
+    uniqueItems: true
+    items:
+      $ref: "#/$defs/skill"
+$defs:
+  paths:
+    type: array
+    uniqueItems: true
+    items:
+      type: string
+      minLength: 1
+      pattern: "^[A-Za-z0-9._*?/-]+$"
+  command:
+    type: object
+    additionalProperties: false
+    required: [name, summary, lane]
+    properties:
+      name:
+        type: string
+        pattern: "^[a-z][a-z0-9-]*$"
+      summary:
+        type: string
+        minLength: 1
+      lane:
+        description: "Fast is save-loop safe; slow is an intentional wait."
+        enum: [fast, slow]
+      aggregate:
+        enum: [check, test]
+      args:
+        type: array
+        uniqueItems: true
+        items:
+          type: string
+          pattern: "^[a-z][a-z0-9-]*$"
+  skill:
+    type: object
+    additionalProperties: false
+    required: [name, summary]
+    properties:
+      name:
+        type: string
+        pattern: "^[a-z][a-z0-9-]*$"
+      summary:
+        type: string
+        minLength: 1

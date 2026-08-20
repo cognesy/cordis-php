@@ -1,0 +1,37 @@
+# Repository-operation index. It owns no work itself: every concrete action
+# belongs to one capability. Paths are derived from this file so the index can
+# be invoked from the repository root or with `just --justfile ops/justfile`.
+
+set shell := ["bash", "-euo", "pipefail", "-c"]
+set positional-arguments := true
+
+OPS := justfile_directory()
+ROOT := parent_directory(OPS)
+
+# Show this router's command surface when invoked directly.
+_default:
+    @just --justfile {{ OPS }}/justfile --working-directory {{ ROOT }} --list
+
+# Validate manifests, schemas, ownership, and declared command surfaces.
+validate *args:
+    @just --justfile {{ OPS }}/control/justfile --working-directory {{ ROOT }} validate {{ args }}
+
+# Inspect the declared operations catalogue.
+list *args:
+    @just --justfile {{ OPS }}/control/justfile --working-directory {{ ROOT }} list {{ args }}
+
+# Check every executable and tool declared by the operation manifests.
+doctor *args:
+    @just --justfile {{ OPS }}/control/justfile --working-directory {{ ROOT }} doctor {{ args }}
+
+# Run the derived fast repository-wide quality lane.
+check *args:
+    @just --justfile {{ OPS }}/control/justfile --working-directory {{ ROOT }} aggregate check {{ args }}
+
+# Run the derived repository-wide test lane.
+test *args:
+    @just --justfile {{ OPS }}/control/justfile --working-directory {{ ROOT }} aggregate test {{ args }}
+
+# Dispatch through this index when it is used as a standalone justfile.
+capability name command *args:
+    @just --justfile {{ OPS }}/{{ name }}/justfile --working-directory {{ ROOT }} {{ command }} {{ args }}

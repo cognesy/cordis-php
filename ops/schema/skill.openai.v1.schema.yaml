@@ -1,0 +1,43 @@
+---
+$schema: "https://json-schema.org/draft/2020-12/schema"
+$id: "ops/skill.openai.v1.schema.yaml"
+title: "Cordis PHP OpenAI Skill Presentation (v1)"
+description: >-
+  Versioned presentation metadata for a repository-local agent skill. The
+  procedural source remains SKILL.md; this file makes its discoverability data
+  explicit and machine-checkable.
+type: object
+additionalProperties: false
+required:
+  - $schema
+  - schema_version
+  - interface
+  - policy
+properties:
+  $schema:
+    type: string
+    minLength: 1
+  schema_version:
+    const: "ops-skill-openai/v1"
+  interface:
+    type: object
+    additionalProperties: false
+    required: [display_name, short_description, default_prompt]
+    properties:
+      display_name:
+        type: string
+        minLength: 1
+      short_description:
+        type: string
+        minLength: 25
+        maxLength: 64
+      default_prompt:
+        type: string
+        minLength: 1
+  policy:
+    type: object
+    additionalProperties: false
+    required: [allow_implicit_invocation]
+    properties:
+      allow_implicit_invocation:
+        type: boolean

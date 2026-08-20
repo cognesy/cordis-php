@@ -1,0 +1,10 @@
+---
+$schema: "../../../../schema/skill.openai.v1.schema.yaml"
+schema_version: "ops-skill-openai/v1"
+interface:
+  display_name: "Cordis PHP Package Verification"
+  short_description: "Inspect release archive contents with concrete evidence."
+  default_prompt: >-
+    Use $cordis-php-package-verification to verify a package change.
+policy:
+  allow_implicit_invocation: true

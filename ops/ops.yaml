@@ -1,0 +1,15 @@
+---
+$schema: "schema/ops.v1.schema.yaml"
+schema_version: "ops/v1"
+
+# One active provider per interface. A future capability can replace one by
+# declaring the same `provides` value and changing only this binding.
+active:
+  operations-control: control
+  quality: quality
+  specification: spec
+  test: test
+  documentation: docs
+  package-integrity: packaging
+  local-delivery: workflow
+  distribution: release

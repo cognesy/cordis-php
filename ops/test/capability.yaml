@@ -1,0 +1,32 @@
+---
+$schema: "../schema/capability.v1.schema.yaml"
+schema_version: "ops-capability/v1"
+id: "test"
+provides: "test"
+description: "Runs executable unit and example evidence for the Cordis runtime."
+status: "supported"
+requires:
+  tools:
+    - "composer"
+    - "php"
+  capabilities: []
+owns:
+  - "ops/test/**"
+reads:
+  - "composer.json"
+  - "examples/**"
+  - "tests/**"
+generates: []
+commands:
+  - name: "unit"
+    summary: "Run the Pest suite that verifies runtime behavior."
+    lane: "slow"
+    aggregate: "test"
+  - name: "examples"
+    summary: "Run every documented executable example."
+    lane: "slow"
+    aggregate: "test"
+  - name: "all"
+    summary: "Run unit tests and examples as a local confidence loop."
+    lane: "slow"
+skills: []

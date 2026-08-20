@@ -59,6 +59,8 @@ composer.lock text eol=lf linguist-generated=true export-ignore
 
 # Development-only material stays in the repository but not release archives.
 .github/** export-ignore
+ops/** export-ignore
+skills/** export-ignore
 tests/** export-ignore
 phpunit.xml export-ignore
 phpstan.neon export-ignore

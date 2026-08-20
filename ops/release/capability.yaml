@@ -1,0 +1,41 @@
+---
+$schema: "../schema/capability.v1.schema.yaml"
+schema_version: "ops-capability/v1"
+id: "release"
+provides: "distribution"
+description: >-
+  Provides guarded release inspection and publishing commands for GitHub
+  distribution.
+status: "experimental"
+requires:
+  tools:
+    - "gh"
+    - "git"
+    - "just"
+    - "php"
+  capabilities:
+    - "workflow"
+owns:
+  - "ops/release/**"
+reads:
+  - ".gitattributes"
+  - "README.md"
+  - "composer.json"
+generates: []
+commands:
+  - name: "status"
+    summary: "Report repository and GitHub release state without mutation."
+    lane: "fast"
+  - name: "gate"
+    summary: >-
+      Require a clean repository and successful local delivery workflow.
+    lane: "slow"
+  - name: "publish"
+    summary: >-
+      Create a versioned GitHub release after explicit local validation.
+    lane: "slow"
+    args:
+      - "version"
+skills:
+  - name: "cordis-php-release-publishing"
+    summary: "Perform an explicit, guarded Cordis PHP GitHub release."

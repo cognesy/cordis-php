@@ -1,0 +1,9 @@
+---
+$schema: "../../../../schema/skill.openai.v1.schema.yaml"
+schema_version: "ops-skill-openai/v1"
+interface:
+  display_name: "Cordis PHP Composition Contracts"
+  short_description: "Evolve YAML contracts with executable evidence."
+  default_prompt: "Use $cordis-php-composition-contracts for a YAML change."
+policy:
+  allow_implicit_invocation: true

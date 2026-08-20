@@ -1,0 +1,13 @@
+composer-validate:
+    @composer validate --strict
+
+analysis:
+    @composer analyse
+    @php vendor/bin/phpstan analyse --level=max ops --memory-limit=512M
+
+lint:
+    @composer lint
+
+all:
+    @composer qa
+    @php vendor/bin/phpstan analyse --level=max ops --memory-limit=512M

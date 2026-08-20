@@ -117,6 +117,33 @@ The Pest suite covers lifetimes, service replacement, dependency pending and
 restart, event modes, YAML validation, expression safety, patches, groups,
 and live reconciliation.
 
+## Repository operations
+
+The repository carries a versioned, self-describing operations catalogue under
+[`ops/`](ops/README.md). It keeps local developer and agent workflows explicit
+without replacing Composer's PHP tooling:
+
+```sh
+just                         # discover the local command surface
+just validate                # verify the versioned operations catalogue
+just check                   # run its derived fast quality lane
+just ci                      # run the CI-shaped local workflow
+just ops release status      # reach any capability directly
+```
+
+Each capability declares its command surface, required tools, path ownership,
+and any agent skill. The control validator checks those contracts, and the
+repository-wide check and test lanes are derived from the manifests rather than
+maintained as a second hand-written list.
+
+## Operator and agent skills
+
+The solution-facing [skill catalogue](skills/README.md) maps real Cordis use
+cases to focused procedures for design, agent harnesses, plugin development,
+YAML configuration, refactoring, operations, troubleshooting, and verification.
+They are repository-local durable instructions for operators and coding agents;
+they complement the repository-maintenance skills stored inside `ops/`.
+
 ## Runnable examples
 
 The [examples](examples/README.md) directory contains nine self-checking CLI

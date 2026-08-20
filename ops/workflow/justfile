@@ -1,0 +1,5 @@
+doctor:
+    @php ops/workflow/bin/doctor.php
+
+ci:
+    @php ops/workflow/bin/ci.php

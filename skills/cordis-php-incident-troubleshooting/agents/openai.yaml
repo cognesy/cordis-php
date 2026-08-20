@@ -1,0 +1,6 @@
+---
+interface:
+  display_name: "Cordis PHP Incident Troubleshooting"
+  short_description: "Diagnose Cordis runtime failures"
+  default_prompt: >-
+    Use $cordis-php-incident-troubleshooting for this Cordis incident.

@@ -1,0 +1,32 @@
+---
+$schema: "https://json-schema.org/draft/2020-12/schema"
+$id: "ops/ops.v1.schema.yaml"
+title: "Cordis PHP Repository Operations Catalogue (v1)"
+description: >-
+  The active provider table for repository operations. Each key is an
+  operational interface and each value is the id of the capability selected to
+  provide it. Keeping selection separate from implementation makes a capability
+  replaceable without rediscovering every caller.
+type: object
+additionalProperties: false
+required:
+  - $schema
+  - schema_version
+  - active
+properties:
+  $schema:
+    type: string
+    minLength: 1
+  schema_version:
+    description: >-
+      Version of this catalogue format. Validators select a schema from it.
+    const: "ops/v1"
+  active:
+    description: "Operational interface to active capability id."
+    type: object
+    minProperties: 1
+    propertyNames:
+      pattern: "^[a-z][a-z0-9-]*$"
+    additionalProperties:
+      type: string
+      pattern: "^[a-z][a-z0-9-]*$"

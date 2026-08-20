@@ -1,0 +1,31 @@
+---
+$schema: "../schema/capability.v1.schema.yaml"
+schema_version: "ops-capability/v1"
+id: "spec"
+provides: "specification"
+description: >-
+  Proves YAML composition examples conform to the runtime's published schema.
+status: "supported"
+requires:
+  tools:
+    - "php"
+    - "ys"
+  capabilities: []
+owns:
+  - "ops/spec/**"
+reads:
+  - "resources/schema/composition.schema.yaml"
+  - "examples/**/*.yaml"
+  - "tests/Fixtures/composition-invalid.yaml"
+generates: []
+commands:
+  - name: "schema"
+    summary: "Validate example composition YAML and reject the invalid fixture."
+    lane: "fast"
+    aggregate: "check"
+  - name: "all"
+    summary: "Run every composition contract check exposed by this capability."
+    lane: "fast"
+skills:
+  - name: "cordis-php-composition-contracts"
+    summary: "Safely evolve YAML composition contracts and examples."

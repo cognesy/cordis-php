@@ -1,0 +1,36 @@
+---
+$schema: "../schema/capability.v1.schema.yaml"
+schema_version: "ops-capability/v1"
+id: "packaging"
+provides: "package-integrity"
+description: >-
+  Verifies the distributable archive contains the runtime and excludes
+  development-only files.
+status: "supported"
+requires:
+  tools:
+    - "git"
+    - "php"
+    - "tar"
+  capabilities: []
+owns:
+  - "ops/packaging/**"
+reads:
+  - ".gitattributes"
+  - "composer.json"
+  - "composer.lock"
+  - "examples/**"
+  - "resources/**"
+  - "src/**"
+generates: []
+commands:
+  - name: "archive"
+    summary: "Inspect the current Git archive against package inclusion rules."
+    lane: "fast"
+    aggregate: "check"
+  - name: "all"
+    summary: "Run every package-integrity check exposed by this capability."
+    lane: "fast"
+skills:
+  - name: "cordis-php-package-verification"
+    summary: "Verify the package archive without relying on guesswork."

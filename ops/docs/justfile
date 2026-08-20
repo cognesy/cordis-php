@@ -1,0 +1,7 @@
+lint:
+    @markdownlint README.md docs examples ops skills
+
+contracts:
+    @php ops/docs/bin/check.php
+
+all: lint contracts

@@ -1,0 +1,46 @@
+---
+$schema: "../schema/capability.v1.schema.yaml"
+schema_version: "ops-capability/v1"
+id: "control"
+provides: "operations-control"
+description: >-
+  Makes repository operations discoverable, valid, and safe to compose.
+status: "supported"
+requires:
+  tools:
+    - "just"
+    - "php"
+    - "ys"
+  capabilities: []
+owns:
+  - "ops/README.md"
+  - "ops/ops.yaml"
+  - "ops/justfile"
+  - "ops/bin/**"
+  - "ops/schema/**"
+  - "ops/control/**"
+reads: []
+generates: []
+commands:
+  - name: "list"
+    summary: "List active operations and their available command surface."
+    lane: "fast"
+  - name: "validate"
+    summary: "Validate schemas, graph boundaries, commands, and skills."
+    lane: "fast"
+    aggregate: "check"
+  - name: "doctor"
+    summary: "Check the command-line tools required by active operations."
+    lane: "fast"
+  - name: "aggregate"
+    summary: "Run the manifest-derived repository-wide check or test lane."
+    lane: "slow"
+    args:
+      - "lane"
+  - name: "test"
+    summary: "Prove the validator rejects an ownership conflict."
+    lane: "fast"
+    aggregate: "test"
+skills:
+  - name: "cordis-php-repository-operations"
+    summary: "Navigate and validate Cordis PHP repository operations."

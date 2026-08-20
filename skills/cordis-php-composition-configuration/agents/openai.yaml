@@ -1,0 +1,6 @@
+---
+interface:
+  display_name: "Cordis PHP Composition Configuration"
+  short_description: "Configure YAML-composed Cordis systems"
+  default_prompt: >-
+    Use $cordis-php-composition-configuration for this Cordis YAML.

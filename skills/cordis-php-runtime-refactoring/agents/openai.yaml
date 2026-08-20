@@ -1,0 +1,6 @@
+---
+interface:
+  display_name: "Cordis PHP Runtime Refactoring"
+  short_description: "Refactor Cordis runtime behavior safely"
+  default_prompt: >-
+    Use $cordis-php-runtime-refactoring for this Cordis PHP change.

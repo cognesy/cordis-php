@@ -1,0 +1,33 @@
+---
+$schema: "../schema/capability.v1.schema.yaml"
+schema_version: "ops-capability/v1"
+id: "workflow"
+provides: "local-delivery"
+description: >-
+  Composes validated capability checks into a repeatable local delivery gate.
+status: "supported"
+requires:
+  tools:
+    - "just"
+    - "php"
+  capabilities:
+    - "control"
+    - "docs"
+    - "packaging"
+    - "quality"
+    - "spec"
+    - "test"
+owns:
+  - "ops/workflow/**"
+reads:
+  - "composer.json"
+generates: []
+commands:
+  - name: "doctor"
+    summary: >-
+      Check the operational environment before starting a delivery loop.
+    lane: "fast"
+  - name: "ci"
+    summary: "Run the validated repository-wide check and test lanes locally."
+    lane: "slow"
+skills: []

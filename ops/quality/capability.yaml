@@ -1,0 +1,38 @@
+---
+$schema: "../schema/capability.v1.schema.yaml"
+schema_version: "ops-capability/v1"
+id: "quality"
+provides: "quality"
+description: >-
+  Runs static analysis and style contracts for PHP source and operation scripts.
+status: "supported"
+requires:
+  tools:
+    - "composer"
+    - "php"
+  capabilities: []
+owns:
+  - "ops/quality/**"
+reads:
+  - "composer.json"
+  - "ops/**/*.php"
+  - "phpstan.neon"
+  - "pint.json"
+generates: []
+commands:
+  - name: "composer-validate"
+    summary: "Validate Composer metadata with strict dependency constraints."
+    lane: "fast"
+    aggregate: "check"
+  - name: "analysis"
+    summary: "Run PHPStan on library source and repository operation scripts."
+    lane: "slow"
+    aggregate: "check"
+  - name: "lint"
+    summary: "Check PHP formatting with Laravel Pint without rewriting files."
+    lane: "fast"
+    aggregate: "check"
+  - name: "all"
+    summary: "Run the repository's complete Composer quality suite."
+    lane: "slow"
+skills: []

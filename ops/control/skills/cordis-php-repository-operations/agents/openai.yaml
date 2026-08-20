@@ -1,0 +1,10 @@
+---
+$schema: "../../../../schema/skill.openai.v1.schema.yaml"
+schema_version: "ops-skill-openai/v1"
+interface:
+  display_name: "Cordis PHP Repository Operations"
+  short_description: "Navigate and validate Cordis PHP operations safely."
+  default_prompt: >-
+    Use $cordis-php-repository-operations to inspect Cordis PHP repo ops.
+policy:
+  allow_implicit_invocation: true

@@ -1,0 +1,6 @@
+---
+interface:
+  display_name: "Cordis PHP Plugin Development"
+  short_description: "Build lifecycle-safe Cordis plugins"
+  default_prompt: >-
+    Use $cordis-php-plugin-development for this Cordis PHP plugin.

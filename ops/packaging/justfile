@@ -1,0 +1,4 @@
+archive:
+    @php ops/packaging/bin/check-archive.php
+
+all: archive

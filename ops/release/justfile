@@ -1,0 +1,8 @@
+status:
+    @php ops/release/bin/status.php
+
+gate:
+    @php ops/release/bin/gate.php
+
+publish version:
+    @php ops/release/bin/publish.php {{ version }}

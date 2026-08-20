@@ -1,0 +1,6 @@
+---
+interface:
+  display_name: "Cordis PHP Solution Verification"
+  short_description: "Verify Cordis solution lifecycle contracts"
+  default_prompt: >-
+    Use $cordis-php-solution-verification to verify this Cordis solution.

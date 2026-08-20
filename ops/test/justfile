@@ -1,0 +1,7 @@
+unit:
+    @composer test
+
+examples:
+    @composer examples
+
+all: unit examples
