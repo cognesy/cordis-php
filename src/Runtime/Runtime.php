@@ -6,6 +6,7 @@ namespace CordisPhp\Runtime;
 
 use Closure;
 use CordisPhp\Config\ExpressionEvaluator;
+use CordisPhp\Config\LoaderLimits;
 use CordisPhp\Config\YamlRuntimeLoader;
 use CordisPhp\Event\EventBus;
 use CordisPhp\Exception\DisposalException;
@@ -204,9 +205,9 @@ final class Runtime
         return array_values($this->fibers);
     }
 
-    public function yaml(string $path, ?Context $context = null): YamlRuntimeLoader
+    public function yaml(string $path, ?Context $context = null, ?LoaderLimits $limits = null): YamlRuntimeLoader
     {
-        return new YamlRuntimeLoader($this, $path, $context ?? $this->root);
+        return new YamlRuntimeLoader($this, $path, $context ?? $this->root, $limits ?? new LoaderLimits());
     }
 
     public function dispose(): void

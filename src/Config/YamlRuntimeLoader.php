@@ -31,8 +31,9 @@ final class YamlRuntimeLoader
         private readonly Runtime $runtime,
         private readonly string $path,
         private readonly Context $context,
+        private readonly LoaderLimits $limits = new LoaderLimits(),
     ) {
-        $this->parser = new EntryParser();
+        $this->parser = new EntryParser($this->limits, $this->path);
     }
 
     /**
@@ -108,12 +109,11 @@ final class YamlRuntimeLoader
      */
     private function readDocument(): array
     {
-        if (! is_file($this->path)) {
-            throw new ConfigurationException(sprintf('YAML configuration file "%s" does not exist.', $this->path));
-        }
-
         try {
-            $raw = Yaml::parseFile($this->path, Yaml::PARSE_CUSTOM_TAGS | Yaml::PARSE_EXCEPTION_ON_INVALID_TYPE);
+            $raw = Yaml::parse(
+                $this->readSource(),
+                Yaml::PARSE_CUSTOM_TAGS | Yaml::PARSE_EXCEPTION_ON_INVALID_TYPE,
+            );
         } catch (ParseException $error) {
             throw new ConfigurationException(sprintf('Could not parse "%s": %s', $this->path, $error->getMessage()), 0, $error);
         }
@@ -128,12 +128,38 @@ final class YamlRuntimeLoader
 
     private function documentRevision(): string
     {
-        $revision = hash_file('sha256', $this->path);
-        if ($revision === false) {
-            throw new ConfigurationException(sprintf('Could not inspect YAML configuration file "%s".', $this->path));
+        return hash('sha256', $this->readSource());
+    }
+
+    private function readSource(): string
+    {
+        if (! is_file($this->path)) {
+            throw new ConfigurationException(sprintf('YAML configuration file "%s" does not exist.', $this->path));
         }
 
-        return $revision;
+        $stream = fopen($this->path, 'rb');
+        if ($stream === false) {
+            throw new ConfigurationException(sprintf('Could not read YAML configuration file "%s".', $this->path));
+        }
+
+        try {
+            $source = stream_get_contents($stream, $this->limits->maxBytes + 1);
+        } finally {
+            fclose($stream);
+        }
+
+        if ($source === false) {
+            throw new ConfigurationException(sprintf('Could not read YAML configuration file "%s".', $this->path));
+        }
+        if (strlen($source) > $this->limits->maxBytes) {
+            throw new ConfigurationException(sprintf(
+                'YAML configuration file "%s" exceeds the maximum size of %d bytes.',
+                $this->path,
+                $this->limits->maxBytes,
+            ));
+        }
+
+        return $source;
     }
 
     /**

@@ -16,11 +16,22 @@ final class EntryParser
 {
     private const FIELDS = ['id', 'name', 'config', 'disabled', 'inject', 'isolate', 'intercept', 'group'];
 
+    private int $entries = 0;
+
+    public function __construct(
+        private readonly LoaderLimits $limits = new LoaderLimits(),
+        private readonly string $source = 'YAML document',
+    ) {
+    }
+
     /**
      * @return list<Entry>
      */
     public function parseList(mixed $raw): array
     {
+        $this->entries = 0;
+        $this->assertNesting($raw, '$', 1);
+
         $issues = [];
         $entries = $this->parseEntries($raw, '$', $issues);
 
@@ -46,7 +57,9 @@ final class EntryParser
         $entries = [];
         $ids = [];
         foreach ($raw as $index => $row) {
-            $entry = $this->parseEntry($row, sprintf('%s[%d]', $path, $index), $issues);
+            $entryPath = sprintf('%s[%d]', $path, $index);
+            $this->admitEntry($entryPath);
+            $entry = $this->parseEntry($row, $entryPath, $issues);
             if ($entry === null) {
                 continue;
             }
@@ -60,6 +73,48 @@ final class EntryParser
         }
 
         return $entries;
+    }
+
+    private function admitEntry(string $path): void
+    {
+        ++$this->entries;
+        if ($this->entries > $this->limits->maxEntries) {
+            throw new ConfigurationException(sprintf(
+                'YAML configuration source "%s" exceeds the maximum entry count of %d at %s.',
+                $this->source,
+                $this->limits->maxEntries,
+                $path,
+            ));
+        }
+    }
+
+    private function assertNesting(mixed $value, string $path, int $depth): void
+    {
+        if ($value instanceof TaggedValue) {
+            $this->assertNesting($value->getValue(), $path, $depth);
+
+            return;
+        }
+
+        if (! is_array($value)) {
+            return;
+        }
+
+        if ($depth > $this->limits->maxNesting) {
+            throw new ConfigurationException(sprintf(
+                'YAML configuration source "%s" exceeds the maximum nesting depth of %d at %s.',
+                $this->source,
+                $this->limits->maxNesting,
+                $path,
+            ));
+        }
+
+        foreach ($value as $key => $item) {
+            $childPath = is_int($key)
+                ? sprintf('%s[%d]', $path, $key)
+                : sprintf('%s.%s', $path, $key);
+            $this->assertNesting($item, $childPath, $depth + 1);
+        }
     }
 
     /** @param list<ConfigIssue> $issues */

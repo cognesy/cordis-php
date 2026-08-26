@@ -1,0 +1,50 @@
+---
+$schema: "../schema/capability.v1.schema.yaml"
+schema_version: "ops-capability/v1"
+id: "version"
+provides: "release-versioning"
+description: >-
+  Owns and verifies the Cordis PHP release version and its Git tag contract.
+status: "supported"
+requires:
+  tools:
+    - "composer"
+    - "git"
+    - "php"
+  capabilities: []
+owns:
+  - "ops/version/**"
+reads:
+  - "CHANGELOG.md"
+  - ".github/workflows/release.yml"
+  - "composer.json"
+generates: []
+commands:
+  - name: "show"
+    summary: "Show the authoritative package version and local release state."
+    lane: "fast"
+  - name: "value"
+    summary: "Print only the authoritative package version for automation."
+    lane: "fast"
+  - name: "check"
+    summary: >-
+      Validate the version record, package identity, changelog, and tags.
+    lane: "fast"
+    aggregate: "check"
+  - name: "next"
+    summary: "Preview the next patch, minor, or major stable version."
+    lane: "fast"
+    args:
+      - "part"
+  - name: "set"
+    summary: "Set a newer stable version in the release authority."
+    lane: "fast"
+    args:
+      - "version"
+  - name: "sync"
+    summary: "Fetch release tags from origin for local inspection."
+    lane: "slow"
+  - name: "verify-release"
+    summary: "Require a clean HEAD and matching pushed annotated release tag."
+    lane: "fast"
+skills: []

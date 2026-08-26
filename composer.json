@@ -3,6 +3,11 @@
   "description": "A strictly typed, YAML-composed plugin runtime for PHP 8.4+.",
   "type": "library",
   "license": "MIT",
+  "homepage": "https://github.com/cognesy/cordis-php",
+  "support": {
+    "issues": "https://github.com/cognesy/cordis-php/issues",
+    "source": "https://github.com/cognesy/cordis-php/tree/main"
+  },
   "keywords": [
     "plugins",
     "composition",

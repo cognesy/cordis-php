@@ -1,0 +1,27 @@
+---
+$schema: "https://json-schema.org/draft/2020-12/schema"
+$id: "ops/version/current.v1.schema.yaml"
+title: "Cordis PHP release version record (v1)"
+description: >-
+  The single stable release version for the Cordis PHP Composer package.
+type: object
+additionalProperties: false
+required:
+  - $schema
+  - schema_version
+  - product
+  - product_version
+  - tag_prefix
+properties:
+  $schema:
+    type: string
+    minLength: 1
+  schema_version:
+    const: "cordis-php-version/v1"
+  product:
+    const: "cordis-php"
+  product_version:
+    type: string
+    pattern: "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"
+  tag_prefix:
+    const: "v"

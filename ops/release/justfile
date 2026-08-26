@@ -6,3 +6,6 @@ gate:
 
 publish version:
     @php ops/release/bin/publish.php {{ version }}
+
+package *args:
+    @php ops/release/bin/package.php {{ args }}

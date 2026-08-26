@@ -4,24 +4,31 @@ schema_version: "ops-capability/v1"
 id: "release"
 provides: "distribution"
 description: >-
-  Provides guarded release inspection and publishing commands for GitHub
-  distribution.
-status: "experimental"
+  Provides guarded source-archive packaging and GitHub Release publication for
+  the Composer package.
+status: "supported"
 requires:
   tools:
+    - "composer"
     - "gh"
     - "git"
     - "just"
     - "php"
+    - "tar"
   capabilities:
+    - "packaging"
+    - "version"
     - "workflow"
 owns:
   - "ops/release/**"
 reads:
   - ".gitattributes"
+  - ".github/workflows/release.yml"
+  - "CHANGELOG.md"
   - "README.md"
   - "composer.json"
-generates: []
+generates:
+  - "dist/release/**"
 commands:
   - name: "status"
     summary: "Report repository and GitHub release state without mutation."
@@ -32,10 +39,15 @@ commands:
     lane: "slow"
   - name: "publish"
     summary: >-
-      Create a versioned GitHub release after explicit local validation.
+      Create a versioned GitHub Release with checked package assets.
     lane: "slow"
     args:
       - "version"
+  - name: "package"
+    summary: "Build the tagged source archive, checksum, and release manifest."
+    lane: "slow"
+    args:
+      - "output"
 skills:
   - name: "cordis-php-release-publishing"
-    summary: "Perform an explicit, guarded Cordis PHP GitHub release."
+    summary: "Perform an explicit, guarded Packagist and GitHub release."

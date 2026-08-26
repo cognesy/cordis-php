@@ -1,23 +1,24 @@
 ---
 name: cordis-php-release-publishing
-description: Perform a deliberate, guarded GitHub release for Cordis PHP.
+description: Perform a deliberate, guarded Packagist and GitHub release for Cordis PHP.
 ---
 
 # Cordis PHP release publishing
 
-Use this skill only when a GitHub release is explicitly authorized.
+Use this skill only when Packagist/GitHub publication is explicitly authorized.
 
-1. Start with `just ops release status` and inspect the branch, revision,
-   working-tree state, and repository identity.
-2. Run `just ops release gate`; it requires a clean worktree and the full
+1. Start with `just ops version show` and `just ops release status`.
+2. Confirm `CHANGELOG.md`, `composer.json`, and the version authority are
+   coherent with `just ops version check`.
+3. Run `just ops release gate`; it requires a clean worktree and the full
    local delivery workflow.
-3. Confirm that an existing annotated or lightweight `vMAJOR.MINOR.PATCH` tag
-   points at the intended commit.
-4. Only after those checks and explicit authorization, run `just ops release
-   publish <version>`.
-5. Record the resulting release URL and do not retag or overwrite a published
-   artifact to repair a mistake; publish a new patch instead.
+4. Confirm that the annotated `vMAJOR.MINOR.PATCH` tag points at clean `HEAD`
+   and is pushed with `just ops version verify-release`.
+5. Build and inspect the exact assets with `just ops release package`.
+6. Only after those checks and explicit authorization, run `just ops release
+   publish <version>` or push the tag to let GitHub Actions publish it.
+7. Record the resulting Release URL and Packagist availability. Do not retag
+   or overwrite a published artifact to repair a mistake; publish a new patch.
 
-The capability is experimental because package publication policy remains an
-organizational decision. Do not treat a passing local gate as publishing
-authority.
+Packagist ingests the pushed Git tag; it is not a second package upload command.
+Do not treat a passing local gate as publishing authority.

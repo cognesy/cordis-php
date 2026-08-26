@@ -1,0 +1,23 @@
+default:
+    @just --list
+
+show:
+    @php ops/version/bin/version.php show
+
+value:
+    @php ops/version/bin/version.php value
+
+check:
+    @php ops/version/bin/version.php check
+
+next part:
+    @php ops/version/bin/version.php next {{ part }}
+
+set version:
+    @php ops/version/bin/version.php set {{ version }}
+
+sync:
+    @php ops/version/bin/version.php sync
+
+verify-release:
+    @php ops/version/bin/version.php verify-release

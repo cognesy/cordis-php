@@ -17,6 +17,7 @@ requires:
     - "quality"
     - "spec"
     - "test"
+    - "version"
 owns:
   - "ops/workflow/**"
 reads:

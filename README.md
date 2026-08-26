@@ -117,6 +117,22 @@ The Pest suite covers lifetimes, service replacement, dependency pending and
 restart, event modes, YAML validation, expression safety, patches, groups,
 and live reconciliation.
 
+## Releases
+
+The package is published through [Packagist](https://packagist.org/) from the
+public GitHub repository. Release versions are owned by
+[`ops/version/current.yaml`](ops/version/current.yaml), and `v<version>` tags
+drive the checked GitHub Release workflow. Contributors preparing a release
+can inspect the complete procedure with:
+
+```sh
+just ops version check
+just ops release gate
+```
+
+Packagist derives Composer versions from the VCS tags, so the Composer manifest
+intentionally does not duplicate the release version.
+
 ## Repository operations
 
 The repository carries a versioned, self-describing operations catalogue under

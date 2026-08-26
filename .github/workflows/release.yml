@@ -1,0 +1,80 @@
+---
+name: Release
+
+on:  # yamllint disable-line rule:truthy
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  github-release:
+    name: Build and publish the Composer source release
+    runs-on: ubuntu-latest
+    concurrency:
+      group: cordis-php-release-${{ github.ref }}
+      cancel-in-progress: false
+    steps:
+      - name: Check out the pushed tag and its history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch the exact annotated tag reference
+        env:
+          TAG: ${{ github.ref_name }}
+        run: git fetch --force origin "refs/tags/$TAG:refs/tags/$TAG"
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          coverage: none
+          tools: composer:v2
+
+      - name: Install Just
+        uses: taiki-e/install-action@v2
+        with:
+          tool: just
+
+      - name: Install YAML Schema validator
+        run: cargo install yaml-schema --locked
+
+      - name: Install locked Composer dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Verify the exact pushed annotated release tag
+        run: just ops version verify-release
+
+      - name: Prove source and package behavior
+        run: just ops workflow ci
+
+      - name: Build checked release assets
+        id: package
+        env:
+          RELEASE_DIRECTORY: ${{ runner.temp }}/cordis-php-release
+        run: |
+          just ops release package "$RELEASE_DIRECTORY"
+          echo "directory=$RELEASE_DIRECTORY" >> "$GITHUB_OUTPUT"
+
+      - name: Retain release assets as a workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cordis-php-${{ github.ref_name }}
+          path: ${{ steps.package.outputs.directory }}
+          if-no-files-found: error
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+          RELEASE_DIRECTORY: ${{ steps.package.outputs.directory }}
+        run: |
+          gh release create "$TAG" \
+            "$RELEASE_DIRECTORY"/cordis-php-*.tar.gz \
+            "$RELEASE_DIRECTORY"/SHA256SUMS.txt \
+            "$RELEASE_DIRECTORY"/release-manifest.json \
+            --repo "$GITHUB_REPOSITORY" --verify-tag \
+            --title "Cordis PHP $TAG" --generate-notes

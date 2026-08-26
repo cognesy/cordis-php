@@ -12,4 +12,5 @@ active:
   documentation: docs
   package-integrity: packaging
   local-delivery: workflow
+  release-versioning: version
   distribution: release

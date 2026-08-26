@@ -367,6 +367,13 @@ function schemaDiagnostics(string $root, array $capabilities): array
         'instance' => $root . '/ops/ops.yaml',
     ]];
 
+    $versionSchema = $root . '/ops/version/schema/current.v1.schema.yaml';
+    $versionRecord = $root . '/ops/version/current.yaml';
+    $checks[] = [
+        'schema' => $versionSchema,
+        'instance' => $versionRecord,
+    ];
+
     foreach ($capabilities as $capability) {
         $checks[] = [
             'schema' => $root . '/ops/schema/capability.v1.schema.yaml',

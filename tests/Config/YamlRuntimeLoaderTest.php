@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use CordisPhp\Config\ExpressionEvaluator;
+use CordisPhp\Config\LoaderLimits;
 use CordisPhp\Exception\ConfigurationException;
 use CordisPhp\Plugin\PluginRegistry;
 use CordisPhp\Runtime\Context;
@@ -10,6 +11,8 @@ use CordisPhp\Runtime\FiberState;
 use CordisPhp\Runtime\Runtime;
 use CordisPhp\Tests\Support\ContractPlugin;
 use CordisPhp\Tests\Support\YamlFixture;
+use Symfony\Component\Yaml\Exception\ParseException;
+use Symfony\Component\Yaml\Yaml;
 
 test('YAML groups mount, retain structural expression equality, and reconcile changed config', function (): void {
     $events = [];
@@ -196,4 +199,99 @@ test('invalid YAML document structure fails before mounting anything', function 
     } finally {
         YamlFixture::remove($path);
     }
+});
+
+test('loader limits reject invalid reloads before lifecycle changes', function (LoaderLimits $limits, string $replacement, string $breach): void {
+    $events = [];
+    $plugins = new PluginRegistry();
+    $plugins->registerClosure('recorder', function (Context $_context, mixed $_config) use (&$events): Closure {
+        $events[] = 'start';
+
+        return function () use (&$events): void {
+            $events[] = 'stop';
+        };
+    });
+    $runtime = new Runtime($plugins);
+    $path = YamlFixture::create(<<<'YAML'
+- id: recorder
+  name: recorder
+YAML);
+
+    try {
+        $loader = $runtime->yaml($path, limits: $limits);
+        $loader->reload();
+        YamlFixture::overwrite($path, $replacement);
+
+        try {
+            $loader->reload();
+            throw new RuntimeException('Expected the YAML loader to reject the replacement.');
+        } catch (ConfigurationException $error) {
+            expect($error->getMessage())->toContain($path)->toContain($breach);
+        }
+
+        expect($loader->live())->toBe(['recorder'])
+            ->and($events)->toBe(['start']);
+    } finally {
+        YamlFixture::remove($path);
+    }
+})->with([
+    'oversized source' => [
+        new LoaderLimits(maxBytes: 64),
+        str_repeat("# padding\n", 8),
+        'maximum size of 64 bytes',
+    ],
+    'too many entries' => [
+        new LoaderLimits(maxEntries: 1),
+        <<<'YAML'
+- id: replacement
+  name: recorder
+- id: another
+  name: recorder
+YAML,
+        'maximum entry count of 1',
+    ],
+    'too deeply nested groups' => [
+        new LoaderLimits(maxNesting: 3),
+        <<<'YAML'
+- id: replacement
+  group:
+    - id: nested
+      name: recorder
+YAML,
+        'maximum nesting depth of 3',
+    ],
+    'too deeply nested config' => [
+        new LoaderLimits(maxNesting: 3),
+        <<<'YAML'
+- id: replacement
+  name: recorder
+  config:
+    first:
+      second: true
+YAML,
+        'maximum nesting depth of 3',
+    ],
+]);
+
+test('Symfony YAML aliases are materialized as independent values', function (): void {
+    $raw = Yaml::parse(<<<'YAML'
+defaults: &defaults
+  nested: original
+left: *defaults
+right: *defaults
+YAML);
+    $raw['left']['nested'] = 'changed';
+
+    expect($raw['defaults']['nested'])->toBe('original')
+        ->and($raw['right']['nested'])->toBe('original');
+});
+
+test('Symfony YAML rejects recursive aliases before traversal', function (): void {
+    expect(fn (): mixed => Yaml::parse(<<<'YAML'
+root: &shared
+  left:
+    nested: original
+  right: *shared
+YAML))
+        ->toThrow(ParseException::class, 'Circular reference');
 });

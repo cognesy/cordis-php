@@ -33,6 +33,7 @@ function runProcess(array $command, string $workingDirectory): array
 }
 
 $root = dirname(__DIR__, 3);
+$version = runProcess(['php', $root . '/ops/version/bin/version.php', 'show'], $root);
 $branch = runProcess(['git', 'branch', '--show-current'], $root);
 $revision = runProcess(['git', 'rev-parse', '--short', 'HEAD'], $root);
 $dirty = runProcess(['git', 'status', '--porcelain=v1'], $root);
@@ -42,6 +43,7 @@ $repositoryData = $repository['exit'] === EXIT_OK ? json_decode($repository['std
 
 echo json_encode([
     'release_status' => [
+        'version' => $version['exit'] === EXIT_OK || trim($version['stdout']) !== '' ? json_decode($version['stdout'], true) : ['status' => 'unavailable'],
         'branch' => trim($branch['stdout']),
         'revision' => trim($revision['stdout']),
         'working_tree' => trim($dirty['stdout']) === '' ? 'clean' : 'dirty',
