@@ -11,7 +11,43 @@ permissions:
   contents: read
 
 jobs:
-  build:
+  repository-gate:
+    name: Repository gate (PHP 8.4)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          coverage: none
+          tools: composer:v2
+
+      - name: Set up Node.js for documentation tooling
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install Markdown linting tool
+        run: npm install --global markdownlint-cli
+
+      - name: Install Just
+        uses: taiki-e/install-action@v2
+        with:
+          tool: just
+
+      - name: Install YAML Schema validator
+        run: cargo install yaml-schema --locked
+
+      - name: Install locked Composer dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Run the complete repository gate
+        run: just ci
+
+  compatibility:
     name: >-
       PHP ${{ matrix.php }} / Symfony YAML ${{ matrix.symfony }} /
       ${{ matrix.dependencies }}
@@ -58,5 +94,5 @@ jobs:
             --with "symfony/yaml:${{ matrix.symfony }}" \
             --with-all-dependencies
 
-      - name: Run the complete repository gate
-        run: just ci
+      - name: Run the compatibility test capability
+        run: just test
