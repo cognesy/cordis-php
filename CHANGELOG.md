@@ -2,6 +2,12 @@
 
 All notable changes to Cordis PHP are documented here.
 
+## [1.0.1] - 2026-08-26
+
+- Corrected the checked release-archive validator so Git archive directory
+  entries are not mistaken for development files. No development file is
+  included in the distributable source archive.
+
 ## [1.0.0] - 2026-08-26
 
 - First stable release of the strictly typed PHP plugin runtime.

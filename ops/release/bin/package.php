@@ -108,6 +108,10 @@ foreach ([$prefix . 'LICENSE', $prefix . 'README.md', $prefix . 'composer.json',
 }
 foreach ($entries as $entry) {
     $relative = substr($entry, strlen($prefix));
+    if ($relative === '' || str_ends_with($relative, '/')) {
+        continue;
+    }
+
     if (str_starts_with($relative, '.github/') || str_starts_with($relative, 'ops/') || str_starts_with($relative, 'skills/') || str_starts_with($relative, 'tests/')) {
         $failures[] = 'development path leaked into archive: ' . $relative;
     }

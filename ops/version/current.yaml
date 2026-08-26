@@ -2,5 +2,5 @@
 $schema: "schema/current.v1.schema.yaml"
 schema_version: "cordis-php-version/v1"
 product: "cordis-php"
-product_version: 1.0.0
+product_version: 1.0.1
 tag_prefix: "v"
