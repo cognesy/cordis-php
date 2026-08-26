@@ -75,11 +75,6 @@ jobs:
           coverage: none
           tools: composer:v2
 
-      - name: Install Just
-        uses: taiki-e/install-action@v2
-        with:
-          tool: just
-
       - name: Validate the committed dependency contract
         run: composer validate --strict
 
@@ -91,5 +86,7 @@ jobs:
             --with "symfony/yaml:${{ matrix.symfony }}" \
             --with-all-dependencies
 
-      - name: Run the compatibility test capability
-        run: just test
+      - name: Run runtime compatibility tests and examples
+        run: |
+          composer test
+          composer examples
