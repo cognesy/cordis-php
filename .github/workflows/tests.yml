@@ -80,9 +80,6 @@ jobs:
         with:
           tool: just
 
-      - name: Install YAML Schema validator
-        run: cargo install yaml-schema --locked
-
       - name: Validate the committed dependency contract
         run: composer validate --strict
 
