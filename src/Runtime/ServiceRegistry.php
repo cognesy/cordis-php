@@ -62,7 +62,7 @@ final class ServiceRegistry
         $this->bindings[$id] = $binding;
 
         try {
-            $dispose = $scope->defer(function () use ($id, $binding): void {
+            $dispose = $scope->deferBeforeCleanup(function () use ($id, $binding): void {
                 if (($this->bindings[$id] ?? null) !== $binding) {
                     return;
                 }
