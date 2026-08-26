@@ -43,6 +43,65 @@ test('a fiber waits for requirements and restarts around changing services', fun
     expect($events)->toBe(['start:one', 'stop:one', 'start:two', 'stop:two']);
 });
 
+test('a provider unpublishes services and stops dependents before closing its resource', function (): void {
+    $events = [];
+    $consumer = null;
+    $resource = new class () {
+        public bool $closed = false;
+    };
+    $plugins = new PluginRegistry();
+    $plugins->registerClosure('provider', function (Context $context, mixed $_config) use (
+        &$consumer,
+        &$events,
+        $resource,
+    ): Closure {
+        $context->provide('resource', $resource);
+
+        return function () use (&$consumer, &$events, $context, $resource): void {
+            $events[] = [
+                'event' => 'provider-cleanup',
+                'published' => $context->has('resource'),
+                'consumer' => $consumer?->state()->value,
+            ];
+            $resource->closed = true;
+        };
+    });
+    $plugins->registerClosure('consumer', function (Context $context, mixed $_config) use (
+        &$events,
+        $resource,
+    ): Closure {
+        $context->get('resource');
+
+        return function () use (&$events, $context, $resource): void {
+            $events[] = [
+                'event' => 'consumer-cleanup',
+                'published' => $context->has('resource'),
+                'resource-closed' => $resource->closed,
+            ];
+        };
+    }, ['resource']);
+    $runtime = new Runtime($plugins);
+
+    $provider = $runtime->mount('provider');
+    $consumer = $runtime->mount('consumer');
+    $provider->dispose();
+
+    expect($events)->toBe([
+        [
+            'event' => 'consumer-cleanup',
+            'published' => false,
+            'resource-closed' => false,
+        ],
+        [
+            'event' => 'provider-cleanup',
+            'published' => false,
+            'consumer' => FiberState::Pending->value,
+        ],
+    ])->and($resource->closed)->toBeTrue()
+        ->and($consumer->state())->toBe(FiberState::Pending)
+        ->and($consumer->missing())->toBe(['resource']);
+});
+
 test('an isolated realm cannot see a deliberately hidden parent service', function (): void {
     $plugins = new PluginRegistry();
     $plugins->registerClosure('consumer', static function (Context $_context, mixed $_config): null {
@@ -55,7 +114,83 @@ test('an isolated realm cannot see a deliberately hidden parent service', functi
 
     expect($fiber->state())->toBe(FiberState::Pending)
         ->and($fiber->missing())->toBe(['secret']);
-});
+})->group('isolation');
+
+test('interception metadata is immutable and local to each mounted workload', function (): void {
+    $seen = [];
+    $plugins = new PluginRegistry();
+    $plugins->registerClosure('client', function (Context $context, mixed $_config) use (&$seen): null {
+        $seen[] = $context->interceptionFor('http');
+
+        return null;
+    });
+    $runtime = new Runtime($plugins);
+
+    $fast = $runtime->mount('client', intercept: ['http' => ['timeout' => 1, 'retries' => 0]]);
+    $durable = $runtime->mount('client', intercept: ['http' => ['timeout' => 10, 'retries' => 3]]);
+
+    expect($seen)->toBe([
+        ['timeout' => 1, 'retries' => 0],
+        ['timeout' => 10, 'retries' => 3],
+    ])->and($fast->context()->interceptionFor('http'))->toBe(['timeout' => 1, 'retries' => 0])
+        ->and($durable->context()->interceptionFor('http'))->toBe(['timeout' => 10, 'retries' => 3])
+        ->and($runtime->root()->interceptionFor('http'))->toBe([]);
+})->group('interception');
+
+test('runtime fibers expose active and failed health without retaining disposed fibers', function (): void {
+    $plugins = new PluginRegistry();
+    $plugins->registerClosure('healthy', static function (Context $_context, mixed $_config): null {
+        return null;
+    });
+    $plugins->registerClosure('failed', static function (Context $_context, mixed $_config): never {
+        throw new RuntimeException('startup failed');
+    });
+    $runtime = new Runtime($plugins);
+
+    $healthy = $runtime->mount('healthy');
+    $failed = $runtime->mount('failed');
+
+    expect(array_map(
+        static fn (Fiber $fiber): array => [$fiber->label(), $fiber->state()->value, $fiber->error()?->getMessage()],
+        $runtime->fibers(),
+    ))->toBe([
+        ['healthy', 'active', null],
+        ['failed', 'failed', 'startup failed'],
+    ]);
+
+    $healthy->dispose();
+
+    expect($runtime->fibers())->toBe([$failed]);
+
+    $runtime->dispose();
+
+    expect($runtime->fibers())->toBe([]);
+})->group('health');
+
+test('restarting a long-lived fiber releases every previous attempt scope', function (): void {
+    $plugins = new PluginRegistry();
+    $plugins->registerClosure('worker', static function (Context $_context, mixed $_config): null {
+        return null;
+    });
+    $runtime = new Runtime($plugins);
+    $runtime->root()->provide('clock', 'stable');
+    $fiber = $runtime->mount('worker');
+    $previousAttempts = [];
+
+    for ($revision = 0; $revision < 500; ++$revision) {
+        $previousScope = $fiber->scope();
+        $previousAttempts[] = WeakReference::create($previousScope);
+        $fiber->update(['revision' => $revision]);
+        unset($previousScope);
+    }
+    gc_collect_cycles();
+
+    expect(array_filter(
+        $previousAttempts,
+        static fn (WeakReference $reference): bool => $reference->get() !== null,
+    ))->toBe([])
+        ->and($fiber->state())->toBe(FiberState::Active);
+})->group('reconciliation');
 
 test('a child mounted through an extended context remains owned by its parent fiber', function (): void {
     $plugins = new PluginRegistry();

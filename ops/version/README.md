@@ -17,7 +17,7 @@ just ops version next patch
 commit, tag, push, or publish:
 
 ```sh
-just ops version set 0.1.1
+just ops version set 1.0.1
 ```
 
 `verify-release` is the final tag guard. It requires the current `v<version>`

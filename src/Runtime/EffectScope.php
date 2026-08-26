@@ -11,12 +11,21 @@ use CordisPhp\Exception\PluginException;
 use Throwable;
 
 /**
- * Owns registrations and releases them in precise reverse registration order.
+ * Owns registrations and releases each lifecycle phase in reverse registration
+ * order, with before-cleanup records released before ordinary cleanup.
  */
 final class EffectScope
 {
-    /** @var list<EffectRecord> */
+    /** @var array<int, EffectRecord> */
+    private array $beforeCleanupRecords = [];
+
+    /** @var array<int, EffectRecord> */
     private array $records = [];
+
+    private int $nextRecordId = 1;
+
+    /** @var null|Closure(): void */
+    private ?Closure $parentRelease = null;
 
     private bool $active = true;
 
@@ -47,14 +56,21 @@ final class EffectScope
      */
     public function defer(Closure $disposer, string $label = 'anonymous'): Closure
     {
-        $this->assertActive();
+        return $this->register($disposer, $label, false);
+    }
 
-        $record = new EffectRecord($label, $disposer);
-        $this->records[] = $record;
-
-        return static function () use ($record): void {
-            $record->dispose();
-        };
+    /**
+     * Register a disposer that runs before ordinary cleanup begins.
+     *
+     * This phase is reserved for withdrawing externally visible capabilities
+     * before the resources behind them are closed.
+     *
+     * @internal
+     * @return Closure(): void
+     */
+    public function deferBeforeCleanup(Closure $disposer, string $label = 'anonymous'): Closure
+    {
+        return $this->register($disposer, $label, true);
     }
 
     /**
@@ -84,7 +100,7 @@ final class EffectScope
     {
         $this->assertActive();
         $child = new self($label, $this);
-        $this->defer(static function () use ($child): void {
+        $child->parentRelease = $this->defer(static function () use ($child): void {
             $child->dispose();
         }, sprintf('child:%s', $label));
 
@@ -93,14 +109,20 @@ final class EffectScope
 
     public function dispose(): void
     {
-        if (! $this->active) {
+        if (! $this->active || $this->disposing) {
             return;
         }
 
         $this->disposing = true;
         $errors = [];
+        $records = [
+            ...array_reverse($this->beforeCleanupRecords),
+            ...array_reverse($this->records),
+        ];
+        $this->beforeCleanupRecords = [];
+        $this->records = [];
 
-        foreach (array_reverse($this->records) as $record) {
+        foreach ($records as $record) {
             try {
                 $record->dispose();
             } catch (Throwable $error) {
@@ -111,9 +133,50 @@ final class EffectScope
         $this->active = false;
         $this->disposing = false;
 
+        $parentRelease = $this->parentRelease;
+        $this->parentRelease = null;
+        if ($parentRelease !== null) {
+            try {
+                $parentRelease();
+            } catch (Throwable $error) {
+                $errors[] = $error;
+            }
+        }
+
         if ($errors !== []) {
             throw new DisposalException($errors);
         }
+    }
+
+    /**
+     * @return Closure(): void
+     */
+    private function register(Closure $disposer, string $label, bool $beforeCleanup): Closure
+    {
+        $this->assertActive();
+
+        $id = $this->nextRecordId++;
+        $record = new EffectRecord($label, $disposer);
+        if ($beforeCleanup) {
+            $this->beforeCleanupRecords[$id] = $record;
+        } else {
+            $this->records[$id] = $record;
+        }
+
+        return function () use ($id, $record, $beforeCleanup): void {
+            try {
+                $record->dispose();
+            } finally {
+                $records = $beforeCleanup ? $this->beforeCleanupRecords : $this->records;
+                if (($records[$id] ?? null) === $record) {
+                    if ($beforeCleanup) {
+                        unset($this->beforeCleanupRecords[$id]);
+                    } else {
+                        unset($this->records[$id]);
+                    }
+                }
+            }
+        };
     }
 }
 

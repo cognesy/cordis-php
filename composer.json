@@ -1,6 +1,6 @@
 {
   "name": "cordis-php/cordis",
-  "description": "A strictly typed, YAML-composed plugin runtime for PHP 8.4+.",
+  "description": "A strictly typed, YAML-composed plugin runtime for PHP 8.2+.",
   "type": "library",
   "license": "MIT",
   "homepage": "https://github.com/cognesy/cordis-php",
@@ -16,8 +16,8 @@
     "cordis"
   ],
   "require": {
-    "php": "^8.4",
-    "symfony/yaml": "^7.3"
+    "php": "^8.2",
+    "symfony/yaml": "^7.3 || ^8.0"
   },
   "require-dev": {
     "laravel/pint": "^1.21",
@@ -51,7 +51,7 @@
   },
   "config": {
     "platform": {
-      "php": "8.4.0"
+      "php": "8.2.0"
     },
     "sort-packages": true,
     "allow-plugins": {

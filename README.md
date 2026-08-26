@@ -1,6 +1,6 @@
 # Cordis PHP
 
-Cordis PHP is a strictly typed PHP 8.4+ runtime for building applications from
+Cordis PHP is a strictly typed PHP 8.2+ runtime for building applications from
 reversible plugins and YAML composition. It takes the durable parts of Cordis:
 
 - plugin instances own a scope and clean up in reverse order;
@@ -103,6 +103,10 @@ replace a row's fields or append entries to the root or a group:
 
 `reloadIfChanged()` is the host-friendly hot-reload primitive: a CLI watcher,
 RoadRunner worker, or framework development server decides when to call it.
+Lifecycle changes settle synchronously, and provider services are unpublished
+before provider cleanup runs so dependents stop first. Long-lived hosts must
+still call reload at a quiescent safe point: Cordis cannot invalidate a service
+reference already held by application code that is still executing.
 
 ## Quality gates
 
@@ -115,7 +119,9 @@ ys -f resources/schema/composition.schema.yaml examples/03-yaml-live-reload/comp
 
 The Pest suite covers lifetimes, service replacement, dependency pending and
 restart, event modes, YAML validation, expression safety, patches, groups,
-and live reconciliation.
+health snapshots, isolation, interception, and live reconciliation. Pull
+requests run the suite on PHP 8.2 through 8.5, with Symfony YAML 7 and Symfony
+YAML 8 on the PHP versions supported by each line.
 
 ## Releases
 

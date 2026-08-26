@@ -128,8 +128,16 @@ try {
     $payload = json_decode($conflict['stdout'], true);
     $error = is_array($payload) ? ($payload['error'] ?? null) : null;
     $diagnostics = is_array($error) ? ($error['diagnostics'] ?? []) : [];
-    $hasOwnershipConflict = is_array($diagnostics)
-        && array_any($diagnostics, static fn (mixed $entry): bool => is_array($entry) && ($entry['rule'] ?? null) === 'ownership-overlap');
+    $hasOwnershipConflict = false;
+    if (is_array($diagnostics)) {
+        foreach ($diagnostics as $entry) {
+            if (is_array($entry) && ($entry['rule'] ?? null) === 'ownership-overlap') {
+                $hasOwnershipConflict = true;
+
+                break;
+            }
+        }
+    }
 
     if ($conflict['exit'] === EXIT_OK || !$hasOwnershipConflict) {
         fwrite(STDERR, $conflict['stdout'] . $conflict['stderr']);

@@ -58,7 +58,7 @@ only when the repository itself must change.
 
 ## Shared operating facts
 
-- Target PHP 8.4 or newer. Cordis PHP is synchronous; let the host own the
+- Target PHP 8.2 or newer. Cordis PHP is synchronous; let the host own the
   event loop, worker supervisor, HTTP server, and long-running agent loop.
 - Treat a plugin fiber and its child scope as the ownership boundary. Services,
   event subscriptions, and cleanup registered through `Context` are released

@@ -22,18 +22,18 @@ just ops release gate
 Prepare a release in this order:
 
 ```sh
-# For the first release, current.yaml already carries 0.1.0. For later
-# releases, advance it first, for example: just ops version set 0.1.1
+# For this release, current.yaml carries 1.0.0. For later releases, advance
+# it first, for example: just ops version set 1.0.1
 # update CHANGELOG.md, then:
 just ci
 git add CHANGELOG.md ops/version/current.yaml composer.json
-git commit -m "Release v0.1.0"
+git commit -m "Release v1.0.0"
 git push origin main
-git tag -a v0.1.0 -m "Cordis PHP v0.1.0"
-git push origin v0.1.0
+git tag -a v1.0.0 -m "Cordis PHP v1.0.0"
+git push origin v1.0.0
 just ops version verify-release
 just ops release package
-just ops release publish 0.1.0
+just ops release publish 1.0.0
 ```
 
 The tag-triggered `.github/workflows/release.yml` repeats the immutable tag

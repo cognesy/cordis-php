@@ -1,0 +1,62 @@
+---
+name: Tests
+
+on:  # yamllint disable-line rule:truthy
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: >-
+      PHP ${{ matrix.php }} / Symfony YAML ${{ matrix.symfony }} /
+      ${{ matrix.dependencies }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ["8.2", "8.3", "8.4", "8.5"]
+        symfony: ["^7.3", "^8.0"]
+        dependencies: ["--prefer-stable", "--prefer-lowest"]
+        exclude:
+          - php: "8.2"
+            symfony: "^8.0"
+          - php: "8.3"
+            symfony: "^8.0"
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+          tools: composer:v2
+
+      - name: Install Just
+        uses: taiki-e/install-action@v2
+        with:
+          tool: just
+
+      - name: Install YAML Schema validator
+        run: cargo install yaml-schema --locked
+
+      - name: Validate the committed dependency contract
+        run: composer validate --strict
+
+      - name: Resolve the matrix dependency line
+        run: |
+          composer config --unset platform.php
+          composer update --no-interaction --prefer-dist --no-progress \
+            ${{ matrix.dependencies }} \
+            --with "symfony/yaml:${{ matrix.symfony }}" \
+            --with-all-dependencies
+
+      - name: Run the complete repository gate
+        run: just ci

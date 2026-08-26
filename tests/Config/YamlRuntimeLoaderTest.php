@@ -83,7 +83,7 @@ YAML);
     } finally {
         YamlFixture::remove($path);
     }
-});
+})->group('reconciliation');
 
 test('failed preflight leaves a healthy live composition in place', function (): void {
     $events = [];
